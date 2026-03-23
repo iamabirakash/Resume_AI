@@ -31,35 +31,35 @@ const Register = () => {
     }
 
     return (
-        <main className="flex max-h-screen w-full flex-col overflow-hidden bg-[#f7f9fb] text-[#191c1e] md:flex-row">
-            <section className="relative flex h-64 w-full items-end overflow-hidden md:h-screen md:max-h-screen md:w-[60%]">
+        <main className="flex min-h-screen w-full flex-col overflow-y-auto bg-[#f7f9fb] text-[#191c1e] md:max-h-screen md:flex-row md:overflow-hidden">
+            <section className="relative flex h-64 w-full shrink-0 items-end overflow-hidden sm:h-72 md:h-screen md:max-h-screen md:w-[60%]">
                 <div className="absolute inset-0 z-0">
                     <img
-                        className="h-full w-full object-fit"
+                        className="h-full w-full object-cover"
                         alt="Modern minimalist workspace with a laptop displaying a professional resume draft"
                         src="https://lh3.googleusercontent.com/aida-public/AB6AXuBaBfncQVr_xVd6F8LjgGFu4NpPS_ibvi7ExC-JpoUKXtZ0TzCVNHYz4ygsgsCKUm92p4mZ73GA_B6ztk6KqQ6PRi4enM7hZGmNcQCddhKpZwvV90BAs5cXzlFHpbtht8Nho3yw1tOtpBrQcLWeyO2hqSotfCDPqonqfIsmqaq6oLTVhFvWJk99ug18I8sNcp67FTKigmBCZ_aMwnkFx_j2QWIfJTeeRBFEWGdmMzhFsBe2ZAr6uhIyiuQUapf0cEiOk8JQ-pfOZg"
                     />
                     <div className="absolute inset-0 bg-linear-to-t from-[#111c2d] via-[#111c2d]/40 to-transparent" />
                 </div>
 
-                <div className="relative z-10 mb-6 w-full p-8 md:p-12 lg:p-14">
-                    <div className="mb-8 md:mb-10">
+                <div className="relative z-10 mb-4 w-full p-6 sm:p-8 md:mb-6 md:p-12 lg:p-14">
+                    <div className="mb-6 md:mb-10">
                         <span className="text-xl font-bold tracking-tight text-[#79849a]">ResumeAI</span>
                     </div>
-                    <h1 className="mb-4 max-w-2xl text-4xl font-extrabold leading-tight tracking-tight text-white md:text-5xl">
+                    <h1 className="mb-3 max-w-2xl text-3xl font-extrabold leading-tight tracking-tight text-white sm:text-4xl md:mb-4 md:text-5xl">
                         Your Career, Elevated by AI
                     </h1>
-                    <p className="max-w-xl text-base leading-relaxed text-[#79849a] opacity-90 md:text-lg">
+                    <p className="max-w-xl text-sm leading-relaxed text-[#79849a] opacity-90 sm:text-base md:text-lg">
                         Architectural precision in career growth. Leverage neural networks to engineer a professional
                         narrative that commands attention.
                     </p>
                 </div>
             </section>
 
-            <section className="flex w-full flex-col justify-center overflow-y-auto bg-[#f2f4f6] px-8 py-8 md:max-h-screen md:w-[40%] md:px-12 md:py-6 lg:px-16">
+            <section className="flex w-full flex-1 flex-col justify-center bg-[#f2f4f6] px-6 py-8 sm:px-8 md:max-h-screen md:w-[40%] md:overflow-y-auto md:px-12 md:py-6 lg:px-16">
                 <div className="mx-auto w-full max-w-md">
                     <header className="mb-6 md:mb-7">
-                        <h2 className="mb-2 text-3xl font-bold tracking-tight text-black">Create Your Account</h2>
+                        <h2 className="mb-2 text-[1.75rem] font-bold tracking-tight text-black sm:text-3xl">Create Your Account</h2>
                         <p className="text-sm font-medium text-[#45464d]">Start building your professional future today.</p>
                     </header>
 
@@ -158,7 +158,7 @@ const Register = () => {
                             </span>
                         </div>
 
-                        {/* <div className="flex justify-center gap-6 text-[10px] font-bold uppercase tracking-[0.2em] text-[#76777d]">
+                        <div className="flex flex-wrap justify-center gap-x-6 gap-y-2 text-[10px] font-bold uppercase tracking-[0.2em] text-[#76777d]">
                             <a className="transition-colors hover:text-black" href="#">
                                 Privacy
                             </a>
@@ -168,7 +168,7 @@ const Register = () => {
                             <a className="transition-colors hover:text-black" href="#">
                                 Compliance
                             </a>
-                        </div> */}
+                        </div>
                     </footer>
                 </div>
             </section>
