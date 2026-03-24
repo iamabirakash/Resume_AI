@@ -38,7 +38,7 @@ const Login = () => {
                     alt="Modern professional office interior"
                     className="absolute inset-0 h-full w-full object-cover"
                 />
-                <div className="absolute inset-0 z-20 bg-gradient-to-tr from-[#111c2d] via-transparent to-transparent opacity-60" />
+                <div className="absolute inset-0 z-20 bg-linear-to-tr from-[#111c2d] via-transparent to-transparent opacity-60" />
 
                 <div className="relative z-30 w-full p-6 sm:p-8 md:absolute md:bottom-24 md:left-12 md:max-w-xl md:p-0">
                     <Link
