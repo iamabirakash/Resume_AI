@@ -2,6 +2,12 @@ import React, { useEffect, useState } from 'react'
 import { useParams } from 'react-router'
 import { useInterview } from '../hooks/useInterview.js'
 
+const FALLBACK_QUOTES = [
+    { content: "Success is where preparation and opportunity meet.", author: "Bobby Unser" },
+    { content: "Quality means doing it right when no one is looking.", author: "Henry Ford" },
+    { content: "Well done is better than well said.", author: "Benjamin Franklin" },
+]
+
 /* ─── shared design tokens (mirror Home.jsx) ─────────────────────────────── */
 const STYLES = `
     @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,700;1,900&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
@@ -129,7 +135,7 @@ const QuestionCard = ({ item, index }) => {
 
             {/* expanded answer */}
             {open && (
-                <div className="pb-6 flex flex-col gap-4 pl-[52px]">
+                <div className="pb-6 flex flex-col gap-4 pl-13">
                     {/* intention */}
                     <div className="border-l-2 border-violet-400 pl-4">
                         <span className="font-mono-code text-[10px] uppercase tracking-widest text-violet-600 block mb-1">Intention</span>
@@ -186,12 +192,45 @@ const LoadingView = () => (
 /* ─── main page ──────────────────────────────────────────────────────────── */
 const Interview = () => {
     const [activeNav, setActiveNav] = useState('technical')
+    const [adviceQuote, setAdviceQuote] = useState(FALLBACK_QUOTES[0])
+    const [quoteLoading, setQuoteLoading] = useState(false)
     const { report, getReportById, loading, getResumePdf } = useInterview()
     const { interviewId } = useParams()
 
     useEffect(() => {
         if (interviewId) getReportById(interviewId)
     }, [interviewId])
+
+    const setRandomFallbackQuote = () => {
+        const random = FALLBACK_QUOTES[Math.floor(Math.random() * FALLBACK_QUOTES.length)]
+        setAdviceQuote(random)
+    }
+
+    const fetchQuote = async () => {
+            setQuoteLoading(true)
+            try {
+                const response = await fetch(`https://api.quotable.io/random?maxLength=140&t=${Date.now()}`, {
+                    method: "GET",
+                    cache: "no-store",
+                })
+                if (!response.ok) {
+                    throw new Error(`Quote API failed with status ${response.status}`)
+                }
+                const data = await response.json()
+                setAdviceQuote({
+                    content: data?.content || FALLBACK_QUOTES[0].content,
+                    author: data?.author || "Unknown",
+                })
+            } catch (error) {
+                setRandomFallbackQuote()
+            } finally {
+                setQuoteLoading(false)
+            }
+        }
+    
+        useEffect(() => {
+            fetchQuote()
+        }, [])
 
     if (loading || !report) return <LoadingView />
 
@@ -230,15 +269,15 @@ const Interview = () => {
 
             {/* ── NAV ──────────────────────────────────────────────────────── */}
             <nav className="fixed top-0 left-0 right-0 z-50 bg-slate-50/90 backdrop-blur-md border-b border-slate-200">
-                <div className="flex items-center justify-between px-8 h-16 max-w-[1200px] mx-auto">
+                <div className="flex items-center justify-between px-8 h-16 max-w-300 mx-auto">
                     <div className="flex items-center gap-10">
                         <span className="font-display text-xl font-black tracking-tight text-slate-900">
-                            Obsidian<span className="italic text-teal-600">Slate</span>
+                            Resume<span className="italic text-teal-600">Analyzer</span>
                         </span>
                         <div className="hidden md:flex items-center gap-7">
                             <a href="#" className="font-mono-code text-[11px] uppercase tracking-widest text-teal-600 border-b-2 border-teal-500 pb-0.5">Resume Architect</a>
-                            <a href="#" className="font-mono-code text-[11px] uppercase tracking-widest text-slate-400 hover:text-slate-800 transition-colors">Drafts</a>
-                            <a href="#" className="font-mono-code text-[11px] uppercase tracking-widest text-slate-400 hover:text-slate-800 transition-colors">Archive</a>
+                            {/* <a href="#" className="font-mono-code text-[11px] uppercase tracking-widest text-slate-400 hover:text-slate-800 transition-colors">Drafts</a>
+                            <a href="#" className="font-mono-code text-[11px] uppercase tracking-widest text-slate-400 hover:text-slate-800 transition-colors">Archive</a> */}
                         </div>
                     </div>
                     <div className="flex items-center gap-5">
@@ -259,7 +298,7 @@ const Interview = () => {
             </nav>
 
             {/* ── CONTENT ──────────────────────────────────────────────────── */}
-            <div className="pt-16 max-w-[1200px] mx-auto px-8">
+            <div className="pt-16 max-w-300 mx-auto px-8">
 
                 {/* Page header */}
                 <header className="pt-14 pb-10 fade-up">
@@ -291,7 +330,7 @@ const Interview = () => {
 
                     {/* Double rule — same as Home */}
                     <div className="mt-8 border-t-2 border-slate-900" />
-                    <div className="mt-[3px] border-t border-teal-400/50" />
+                    <div className="mt-0.75 border-t border-teal-400/50" />
                 </header>
 
                 {/* 3-column grid: left nav | main panel | right sidebar */}
@@ -370,7 +409,7 @@ const Interview = () => {
                             {/* Score bar */}
                             <div className="h-1.5 bg-slate-200 rounded-full overflow-hidden">
                                 <div
-                                    className={`h-full bg-gradient-to-r ${score.bar} rounded-full transition-all duration-700`}
+                                    className={`h-full bg-linear-to-r ${score.bar} rounded-full transition-all duration-700`}
                                     style={{ width: `${report.matchScore}%` }}
                                 />
                             </div>
@@ -402,19 +441,33 @@ const Interview = () => {
 
                         {/* Pro tip dark card — mirrors Home's Pro Advice block */}
                         <div className="bg-slate-900 text-slate-100 relative overflow-hidden">
-                            <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-teal-500 via-teal-400 to-emerald-500" />
+                            <div className="absolute top-0 left-0 right-0 h-1 bg-linear-to-r from-teal-500 via-teal-400 to-emerald-500" />
                             <div className="font-display absolute -right-2 -bottom-8 text-[110px] text-teal-500/10 leading-none select-none pointer-events-none">"</div>
-                            <div className="p-6 relative z-10">
-                                <div className="flex items-center gap-2 mb-4">
-                                    <span className="material-symbols-outlined text-teal-400" style={{ fontSize: 14, fontVariationSettings: "'FILL' 1" }}>tips_and_updates</span>
-                                    <span className="font-mono-code text-[10px] uppercase tracking-[0.18em] text-slate-400">Pro Tip</span>
+                            <div className="p-7 relative z-10">
+                                <div className="flex items-center gap-2 mb-5">
+                                    <span className="material-symbols-outlined text-teal-400" style={{ fontSize: 15, fontVariationSettings: "'FILL' 1" }}>auto_awesome</span>
+                                    <span className="font-mono-code text-[10px] uppercase tracking-[0.18em] text-slate-400">Pro Advice</span>
                                 </div>
-                                <h3 className="font-display text-[19px] font-bold italic leading-tight text-white mb-3">
-                                    Answer with Architecture
+
+                                <h3 className="font-display text-[18px] font-bold leading-tight text-white mb-4">
+                                    A Quote To Inspire Your Job Search Journey
                                 </h3>
-                                <p className="font-body-custom text-[13px] leading-[1.75] text-slate-400">
-                                    Use the STAR method — but lead with the structural <em>decision</em>, not just the outcome. Interviewers remember the reasoning.
+
+                                <p className="font-body-custom text-[13px] leading-[1.75] text-slate-300 mb-3">
+                                    "{adviceQuote.content}"
                                 </p>
+                                <p className="font-mono-code text-[10px] uppercase tracking-[0.14em] text-teal-300 mb-6">
+                                    - {adviceQuote.author}
+                                </p>
+
+                                <button
+                                    onClick={fetchQuote}
+                                    disabled={quoteLoading}
+                                    className="flex items-center gap-2 font-mono-code text-[10px] uppercase tracking-widest text-teal-400 hover:text-teal-300 transition-colors disabled:opacity-60"
+                                >
+                                    {quoteLoading ? "Loading..." : "New Quote"}
+                                    <span className="material-symbols-outlined" style={{ fontSize: 13 }}>arrow_forward</span>
+                                </button>
                             </div>
                         </div>
 
@@ -431,9 +484,9 @@ const Interview = () => {
             </div>
 
             {/* ── FOOTER ───────────────────────────────────────────────────── */}
-            <footer className="border-t border-slate-200 py-7 px-8 flex items-center justify-between max-w-[1200px] mx-auto">
-                <span className="font-display text-base italic text-slate-400">ObsidianSlate</span>
-                <span className="font-mono-code text-[10px] uppercase tracking-widest text-slate-400">© 2026 Obsidian Slate Executive Atelier</span>
+            <footer className="border-t border-slate-200 py-7 px-8 flex items-center justify-between max-w-300 mx-auto">
+                <span className="font-display text-base italic text-slate-400">Resume Analyzer AI</span>
+                <span className="font-mono-code text-[10px] uppercase tracking-widest text-slate-400">© 2026 Resume Analyzer AI</span>
                 <span className="font-mono-code text-[10px] text-slate-300">v2.4.1</span>
             </footer>
         </div>
