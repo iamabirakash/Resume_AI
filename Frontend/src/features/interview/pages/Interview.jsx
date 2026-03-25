@@ -12,7 +12,7 @@ const QuestionCard = ({ item, index }) => {
     const [open, setOpen] = useState(false)
 
     return (
-        <div className="overflow-hidden rounded-[1.5rem] border border-white/10 bg-slate-950/35">
+        <div className="overflow-hidden rounded-3xl border border-white/10 bg-slate-950/35">
             <button
                 type="button"
                 onClick={() => setOpen((prev) => !prev)}
@@ -44,7 +44,7 @@ const QuestionCard = ({ item, index }) => {
 }
 
 const RoadMapDay = ({ day }) => (
-    <div className="relative rounded-[1.5rem] border border-white/10 bg-slate-950/30 p-5 sm:p-6">
+    <div className="relative rounded-3xl border border-white/10 bg-slate-950/30 p-5 sm:p-6">
         <div className="absolute left-6 top-6 h-4 w-4 rounded-full border-4 border-cyan-300 bg-slate-950" />
         <div className="ml-8">
             <div className="flex flex-wrap items-center gap-3">
@@ -67,7 +67,7 @@ const RoadMapDay = ({ day }) => (
 
 const LoadingView = () => (
     <main className="flex min-h-screen items-center justify-center px-6">
-        <div className="glass-panel flex w-full max-w-md flex-col items-center gap-4 rounded-[2rem] px-8 py-10 text-center">
+        <div className="glass-panel flex w-full max-w-md flex-col items-center gap-4 rounded-4xl px-8 py-10 text-center">
             <div className="h-12 w-12 animate-spin rounded-full border-4 border-cyan-500/40 border-t-cyan-500" />
             <div>
                 <h1 className="font-display text-2xl font-bold text-white">Loading your interview plan</h1>
@@ -145,7 +145,7 @@ const Interview = () => {
 
     return (
         <div className="relative min-h-screen overflow-hidden">
-            <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,_rgba(239,71,111,0.16),_transparent_24%),radial-gradient(circle_at_bottom_right,_rgba(0,183,216,0.18),_transparent_26%)]" />
+            <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(239,71,111,0.16),transparent_24%),radial-gradient(circle_at_bottom_right,rgba(0,183,216,0.18),transparent_26%)]" />
 
             <div className="relative mx-auto max-w-7xl px-6 py-8 lg:px-10">
                 <header className="animate-fade-up flex flex-col gap-6 xl:flex-row xl:items-end xl:justify-between">
@@ -169,7 +169,7 @@ const Interview = () => {
                 </header>
 
                 <div className="mt-10 grid gap-8 xl:grid-cols-[17rem_minmax(0,1fr)_20rem]">
-                    <nav className="glass-panel animate-fade-up rounded-[2rem] p-4">
+                    <nav className="glass-panel animate-fade-up rounded-4xl p-4">
                         <p className="px-3 text-xs font-semibold uppercase tracking-[0.22em] text-slate-300">Sections</p>
                         <div className="mt-4 space-y-2">
                             {NAV_ITEMS.map((item) => {
@@ -193,7 +193,7 @@ const Interview = () => {
                         </div>
                     </nav>
 
-                    <main className="glass-panel animate-fade-up-delay scrollbar-none max-h-[calc(100vh-7rem)] overflow-y-auto rounded-[2rem] p-5 sm:p-7">
+                    <main className="glass-panel animate-fade-up-delay scrollbar-none max-h-[calc(100vh-7rem)] overflow-y-auto rounded-4xl p-5 sm:p-7">
                         <div className="flex flex-col gap-3 border-b border-white/10 pb-5 sm:flex-row sm:items-end sm:justify-between">
                             <div>
                                 <p className="text-sm font-semibold uppercase tracking-[0.22em] text-brand-200">Current section</p>
@@ -208,10 +208,10 @@ const Interview = () => {
                     </main>
 
                     <aside className="animate-fade-up-delay space-y-6">
-                        <div className="glass-panel rounded-[2rem] p-6">
+                        <div className="glass-panel rounded-4xl p-6">
                             <p className="text-xs font-semibold uppercase tracking-[0.22em] text-slate-300">Match score</p>
                             <div className="mt-5 flex justify-center">
-                                <div className={`relative flex h-36 w-36 items-center justify-center rounded-full bg-linear-to-br ${score.ring} p-[2px]`}>
+                                <div className={`relative flex h-36 w-36 items-center justify-center rounded-full bg-linear-to-br ${score.ring} p-0.5`}>
                                     <div className="flex h-full w-full flex-col items-center justify-center rounded-full bg-slate-950">
                                         <span className="font-display text-5xl font-extrabold text-white">{report.matchScore}</span>
                                         <span className="text-sm text-slate-400">percent</span>
@@ -221,7 +221,7 @@ const Interview = () => {
                             <p className={`mt-5 rounded-2xl border px-4 py-3 text-sm leading-6 ${score.badge}`}>{score.text}</p>
                         </div>
 
-                        <div className="glass-panel rounded-[2rem] p-6">
+                        <div className="glass-panel rounded-4xl p-6">
                             <p className="text-xs font-semibold uppercase tracking-[0.22em] text-slate-300">Skill gaps</p>
                             <div className="mt-5 flex flex-wrap gap-3">
                                 {report.skillGaps.map((gap, index) => {

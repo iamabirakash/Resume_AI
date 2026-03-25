@@ -12,11 +12,17 @@ async function generateInterViewReportController(req, res) {
 
     const resumeContent = await (new pdfParse.PDFParse(Uint8Array.from(req.file.buffer))).getText()
     const { selfDescription, jobDescription } = req.body
+    const roadmapDays = Number(req.body.roadmapDays)
+    const technicalQuestionCount = Number(req.body.technicalQuestionCount)
+    const behavioralQuestionCount = Number(req.body.behavioralQuestionCount)
 
     const interViewReportByAi = await generateInterviewReport({
         resume: resumeContent.text,
         selfDescription,
-        jobDescription
+        jobDescription,
+        roadmapDays,
+        technicalQuestionCount,
+        behavioralQuestionCount
     })
 
     const interviewReport = await interviewReportModel.create({
