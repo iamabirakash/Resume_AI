@@ -12,6 +12,9 @@ const Home = () => {
     const { loading, generateReport, reports } = useInterview()
     const [jobDescription, setJobDescription] = useState("")
     const [selfDescription, setSelfDescription] = useState("")
+    const [roadmapDays, setRoadmapDays] = useState(25)
+    const [technicalQuestionCount, setTechnicalQuestionCount] = useState(15)
+    const [behavioralQuestionCount, setBehavioralQuestionCount] = useState(15)
     const [searchQuery, setSearchQuery] = useState("")
     const [adviceQuote, setAdviceQuote] = useState(FALLBACK_QUOTES[0])
     const [quoteLoading, setQuoteLoading] = useState(false)
@@ -58,7 +61,14 @@ const Home = () => {
 
     const handleGenerateReport = async () => {
         const resumeFile = resumeInputRef.current?.files?.[0]
-        const data = await generateReport({ jobDescription, selfDescription, resumeFile })
+        const data = await generateReport({
+            jobDescription,
+            selfDescription,
+            resumeFile,
+            roadmapDays,
+            technicalQuestionCount,
+            behavioralQuestionCount
+        })
         if (data && data._id) {
             navigate(`/interview/${data._id}`)
         }
@@ -195,7 +205,7 @@ const Home = () => {
             </nav>
 
             {/* ── MAIN ─────────────────────────────────────────────────────────── */}
-            <main className="pt-16 max-w-[1200px] mx-auto px-8">
+            <main className="pt-16 max-w-300 mx-auto px-8">
 
                 {/* Hero Header */}
                 <header className="pt-5 pb-10 fade-up">
@@ -210,13 +220,13 @@ const Home = () => {
                             Check Your<br />
                             <span className="italic text-teal-600">Resume Match.</span>
                         </h1>
-                        <p className="font-body-custom text-sm text-slate-500 max-w-[210px] text-right leading-relaxed mb-1 shrink-0 hidden sm:block">
+                        <p className="font-body-custom text-sm text-slate-500 max-w-52.5 text-right leading-relaxed mb-1 shrink-0 hidden sm:block">
                             Compare your resume with role requirements and get a match score instantly.
                         </p>
                     </div>
 
                     <div className="mt-8 border-t-2 border-slate-900"></div>
-                    <div className="mt-[3px] border-t border-teal-400/50"></div>
+                    <div className="mt-0.75 border-t border-teal-400/50"></div>
                 </header>
 
                 {/* Grid */}
@@ -256,7 +266,7 @@ const Home = () => {
                             </div>
 
                             {/* Upload zone */}
-                            <label htmlFor="resume-upload" className="block border-2 border-dashed border-slate-300 hover:border-teal-400 bg-gradient-to-br from-slate-50 to-teal-50/50 hover:to-teal-100/40 transition-all duration-300 p-10 flex flex-col items-center justify-center cursor-pointer group mb-8">
+                            <label htmlFor="resume-upload" className="block border-2 border-dashed border-slate-300 hover:border-teal-400 bg-linear-to-br from-slate-50 to-teal-50/50 hover:to-teal-100/40 transition-all duration-300 p-10 flex-col items-center justify-center cursor-pointer group mb-8">
                                 <div className="w-12 h-12 rounded-full bg-teal-100 group-hover:bg-teal-200 flex items-center justify-center mb-3 transition-colors duration-200">
                                     <span className="material-symbols-outlined text-teal-600" style={{ fontSize: 22, fontVariationSettings: "'FILL' 1" }}>upload_file</span>
                                 </div>
@@ -279,9 +289,9 @@ const Home = () => {
                             </label>
 
                             <div className="flex items-center gap-4 py-2 mb-4">
-                                <div className="h-[1px] bg-slate-200 flex-1"></div>
+                                <div className="h-px-slate-200 flex-1"></div>
                                 <span className="text-[10px] uppercase font-bold text-slate-400 font-mono-code">OR</span>
-                                <div className="h-[1px] bg-slate-200 flex-1"></div>
+                                <div className="h-px bg-slate-200 flex-1"></div>
                             </div>
 
                             {/* Self description */}
@@ -301,6 +311,57 @@ const Home = () => {
                                 <span className="font-mono-code text-[10px] uppercase tracking-wider">Provide a Resume OR a Candidate Summary to proceed</span>
                             </div>
                         </section>
+
+                        <div className="mb-8 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 fade-up delay-3">
+                            <div className="rounded-xl border border-slate-200 bg-white p-4">
+                                <label className="mb-2 block font-mono-code text-[10px] uppercase tracking-widest text-slate-500" htmlFor="roadmapDays">
+                                    Roadmap Duration
+                                </label>
+                                <select
+                                    id="roadmapDays"
+                                    className="w-full rounded-lg border border-slate-300 bg-slate-50 px-3 py-2 text-sm text-slate-700 outline-none transition focus:border-teal-500 focus:bg-white"
+                                    value={roadmapDays}
+                                    onChange={(e) => setRoadmapDays(Number(e.target.value))}
+                                >
+                                    <option value={7}>7 Days</option>
+                                    <option value={25}>25 Days</option>
+                                    <option value={45}>45 Days</option>
+                                    <option value={60}>60 Days</option>
+                                </select>
+                            </div>
+
+                            <div className="rounded-xl border border-slate-200 bg-white p-4">
+                                <label className="mb-2 block font-mono-code text-[10px] uppercase tracking-widest text-slate-500" htmlFor="technicalQuestionCount">
+                                    Technical Questions
+                                </label>
+                                <select
+                                    id="technicalQuestionCount"
+                                    className="w-full rounded-lg border border-slate-300 bg-slate-50 px-3 py-2 text-sm text-slate-700 outline-none transition focus:border-teal-500 focus:bg-white"
+                                    value={technicalQuestionCount}
+                                    onChange={(e) => setTechnicalQuestionCount(Number(e.target.value))}
+                                >
+                                    <option value={10}>10 Questions</option>
+                                    <option value={15}>15 Questions</option>
+                                    <option value={20}>20 Questions</option>
+                                </select>
+                            </div>
+
+                            <div className="rounded-xl border border-slate-200 bg-white p-4">
+                                <label className="mb-2 block font-mono-code text-[10px] uppercase tracking-widest text-slate-500" htmlFor="behavioralQuestionCount">
+                                    Behavioral Questions
+                                </label>
+                                <select
+                                    id="behavioralQuestionCount"
+                                    className="w-full rounded-lg border border-slate-300 bg-slate-50 px-3 py-2 text-sm text-slate-700 outline-none transition focus:border-teal-500 focus:bg-white"
+                                    value={behavioralQuestionCount}
+                                    onChange={(e) => setBehavioralQuestionCount(Number(e.target.value))}
+                                >
+                                    <option value={10}>10 Questions</option>
+                                    <option value={15}>15 Questions</option>
+                                    <option value={20}>20 Questions</option>
+                                </select>
+                            </div>
+                        </div>
 
                         {/* Action bar */}
                         <div className="flex flex-col sm:flex-row items-center justify-between gap-5 pt-8 border-t border-slate-200 fade-up delay-3">
@@ -331,12 +392,12 @@ const Home = () => {
                                 </span>
                             </div>
 
-                            <div className="max-h-[300px] overflow-y-auto pr-2 custom-scrollbar">
+                            <div className="max-h-75 overflow-y-auto pr-2 custom-scrollbar">
                                 {filteredReports.length > 0 ? (
                                     filteredReports.map(report => (
                                         <div key={report._id} onClick={() => navigate(`/interview/${report._id}`)} className="plan-row">
                                             <div>
-                                                <p className="font-body-custom text-[14px] font-bold text-slate-800 mb-1 truncate max-w-[160px]">{report.title || 'Untitled Position'}</p>
+                                                <p className="font-body-custom text-[14px] font-bold text-slate-800 mb-1 truncate max-w-40">{report.title || 'Untitled Position'}</p>
                                                 <p className="font-mono-code text-[10px] text-slate-400">Created {new Date(report.createdAt).toLocaleDateString()}</p>
                                             </div>
                                             <span className={`font-mono-code text-[10px] font-bold px-2.5 py-1 shrink-0 ml-3 border ${report.matchScore >= 80 ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : report.matchScore >= 60 ? 'bg-teal-50 text-teal-700 border-teal-200' : 'bg-orange-50 text-orange-700 border-orange-200'}`}>
@@ -354,7 +415,7 @@ const Home = () => {
                             </div>
                         </div>
                         <div className="bg-slate-900 text-slate-100 relative overflow-hidden mb-8">
-                            <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-teal-500 via-teal-400 to-emerald-500"></div>
+                            <div className="absolute top-0 left-0 right-0 h-1 bg-linear-to-r from-teal-500 via-teal-400 to-emerald-500"></div>
                             <div className="font-display absolute -right-2 -bottom-8 text-[120px] text-teal-500/10 leading-none select-none pointer-events-none">"</div>
 
                             <div className="p-7 relative z-10">
@@ -389,7 +450,7 @@ const Home = () => {
             </main>
 
             {/* ── FOOTER ────────────────────────────────────────────────────────── */}
-            <footer className="border-t border-slate-200 py-7 px-8 flex items-center justify-between max-w-[1200px] mx-auto">
+            <footer className="border-t border-slate-200 py-7 px-8 flex items-center justify-between max-w-300 mx-auto">
                 <span className="font-display text-base italic text-slate-400">Resume Analyzer AI</span>
                 <span className="font-mono-code text-[10px] uppercase tracking-widest text-slate-400">© 2026 Resume Analyzer AI</span>
                 <span className="font-mono-code text-[10px] text-slate-300">v2.4.1</span>
