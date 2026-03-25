@@ -409,7 +409,7 @@ const Interview = () => {
                             {/* Score bar */}
                             <div className="h-1.5 bg-slate-200 rounded-full overflow-hidden">
                                 <div
-                                    className={`h-full bg-gradient-to-r ${score.bar} rounded-full transition-all duration-700`}
+                                    className={`h-full bg-linear-to-r ${score.bar} rounded-full transition-all duration-700`}
                                     style={{ width: `${report.matchScore}%` }}
                                 />
                             </div>
