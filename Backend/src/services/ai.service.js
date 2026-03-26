@@ -7,8 +7,56 @@ const ai = new GoogleGenAI({
     apiKey: process.env.GOOGLE_GENAI_API_KEY
 })
 
+const GEMINI_MODELS = (process.env.GEMINI_MODELS || "gemini-3-flash-preview,gemini-2.5-flash,gemini-2.5-pro")
+    .split(",")
+    .map((model) => model.trim())
+    .filter(Boolean)
+
 const ALLOWED_ROADMAP_DAYS = [ 7, 25, 45, 60 ]
 const ALLOWED_QUESTION_COUNTS = [ 10, 15, 20 ]
+
+const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms))
+
+const isRateLimitError = (err) => {
+    const status = err?.status || err?.response?.status || err?.code
+    const message = (err?.message || "").toLowerCase()
+
+    if (status === 429 || status === "429") {
+        return true
+    }
+
+    return message.includes("rate limit")
+        || message.includes("resource_exhausted")
+        || message.includes("quota")
+}
+
+async function generateContentWithModelFallback({ contents, config }) {
+    let lastError
+
+    for (const model of GEMINI_MODELS) {
+        for (let attempt = 1; attempt <= 2; attempt += 1) {
+            try {
+                return await ai.models.generateContent({
+                    model,
+                    contents,
+                    config
+                })
+            } catch (err) {
+                lastError = err
+
+                if (!isRateLimitError(err)) {
+                    throw err
+                }
+
+                const waitMs = attempt * 1500
+                console.log(`Rate limit on model ${model} (attempt ${attempt}). Retrying in ${waitMs}ms.`)
+                await sleep(waitMs)
+            }
+        }
+    }
+
+    throw lastError
+}
 
 const normalizeOption = (value, allowedValues, fallback) => {
     const numericValue = Number(value)
@@ -114,8 +162,7 @@ async function generateInterviewReport({
                         - Ensure all arrays are complete and match these exact counts.
 `
 
-    const response = await ai.models.generateContent({
-        model: "gemini-3-flash-preview",
+    const response = await generateContentWithModelFallback({
         contents: prompt,
         config: {
             responseMimeType: "application/json",
@@ -137,8 +184,11 @@ async function generateInterviewReport({
 
 
 async function generatePdfFromHtml(htmlContent) {
+    process.env.PUPPETEER_CACHE_DIR = process.env.PUPPETEER_CACHE_DIR || "./.cache/puppeteer"
+
+    const executablePath = process.env.PUPPETEER_EXECUTABLE_PATH || puppeteer.executablePath()
     const browser = await puppeteer.launch({
-        executablePath: process.env.PUPPETEER_EXECUTABLE_PATH || undefined,
+        executablePath,
         headless: true,
         args: [ "--no-sandbox", "--disable-setuid-sandbox" ]
     })
@@ -178,8 +228,7 @@ async function generateResumePdf({ resume, selfDescription, jobDescription }) {
                         The resume should not be so lengthy, it should ideally be 1-2 pages long when converted to PDF. Focus on quality rather than quantity and make sure to include all the relevant information that can increase the candidate's chances of getting an interview call for the given job description.
                     `
 
-    const response = await ai.models.generateContent({
-        model: "gemini-3-flash-preview",
+    const response = await generateContentWithModelFallback({
         contents: prompt,
         config: {
             responseMimeType: "application/json",
