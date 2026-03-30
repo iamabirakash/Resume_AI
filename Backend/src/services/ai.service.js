@@ -2,61 +2,14 @@ const { GoogleGenAI } = require("@google/genai")
 const { z } = require("zod")
 const { zodToJsonSchema } = require("zod-to-json-schema")
 const puppeteer = require("puppeteer")
+const path = require("path")
 
 const ai = new GoogleGenAI({
     apiKey: process.env.GOOGLE_GENAI_API_KEY
 })
 
-const GEMINI_MODELS = (process.env.GEMINI_MODELS || "gemini-3-flash-preview,gemini-2.5-flash,gemini-2.5-pro")
-    .split(",")
-    .map((model) => model.trim())
-    .filter(Boolean)
-
 const ALLOWED_ROADMAP_DAYS = [ 7, 25, 45, 60 ]
 const ALLOWED_QUESTION_COUNTS = [ 10, 15, 20 ]
-
-const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms))
-
-const isRateLimitError = (err) => {
-    const status = err?.status || err?.response?.status || err?.code
-    const message = (err?.message || "").toLowerCase()
-
-    if (status === 429 || status === "429") {
-        return true
-    }
-
-    return message.includes("rate limit")
-        || message.includes("resource_exhausted")
-        || message.includes("quota")
-}
-
-async function generateContentWithModelFallback({ contents, config }) {
-    let lastError
-
-    for (const model of GEMINI_MODELS) {
-        for (let attempt = 1; attempt <= 2; attempt += 1) {
-            try {
-                return await ai.models.generateContent({
-                    model,
-                    contents,
-                    config
-                })
-            } catch (err) {
-                lastError = err
-
-                if (!isRateLimitError(err)) {
-                    throw err
-                }
-
-                const waitMs = attempt * 1500
-                console.log(`Rate limit on model ${model} (attempt ${attempt}). Retrying in ${waitMs}ms.`)
-                await sleep(waitMs)
-            }
-        }
-    }
-
-    throw lastError
-}
 
 const normalizeOption = (value, allowedValues, fallback) => {
     const numericValue = Number(value)
@@ -162,7 +115,8 @@ async function generateInterviewReport({
                         - Ensure all arrays are complete and match these exact counts.
 `
 
-    const response = await generateContentWithModelFallback({
+    const response = await ai.models.generateContent({
+        model: "gemini-3-flash-preview",
         contents: prompt,
         config: {
             responseMimeType: "application/json",
@@ -184,29 +138,38 @@ async function generateInterviewReport({
 
 
 async function generatePdfFromHtml(htmlContent) {
-    process.env.PUPPETEER_CACHE_DIR = process.env.PUPPETEER_CACHE_DIR || "./.cache/puppeteer"
+    process.env.PUPPETEER_CACHE_DIR = process.env.PUPPETEER_CACHE_DIR || path.join(__dirname, "../../.cache/puppeteer")
 
     const executablePath = process.env.PUPPETEER_EXECUTABLE_PATH || puppeteer.executablePath()
-    const browser = await puppeteer.launch({
-        executablePath,
-        headless: true,
-        args: [ "--no-sandbox", "--disable-setuid-sandbox" ]
-    })
-    const page = await browser.newPage();
-    await page.setContent(htmlContent, { waitUntil: "networkidle0" })
+    let browser = null;
+    try {
+        browser = await puppeteer.launch({
+            executablePath,
+            headless: "new",
+            args: [ "--no-sandbox", "--disable-setuid-sandbox", "--disable-dev-shm-usage", "--disable-gpu" ]
+        })
+        const page = await browser.newPage();
+        await page.setContent(htmlContent, { waitUntil: "networkidle0" })
 
-    const pdfBuffer = await page.pdf({
-        format: "A4", margin: {
-            top: "20mm",
-            bottom: "20mm",
-            left: "15mm",
-            right: "15mm"
+        const pdfBuffer = await page.pdf({
+            format: "A4", margin: {
+                top: "20mm",
+                bottom: "20mm",
+                left: "15mm",
+                right: "15mm"
+            }
+        })
+
+        return pdfBuffer
+    } finally {
+        if (browser) {
+            try {
+                await browser.close()
+            } catch (err) {
+                console.error("Error closing browser:", err)
+            }
         }
-    })
-
-    await browser.close()
-
-    return pdfBuffer
+    }
 }
 
 async function generateResumePdf({ resume, selfDescription, jobDescription }) {
@@ -228,7 +191,8 @@ async function generateResumePdf({ resume, selfDescription, jobDescription }) {
                         The resume should not be so lengthy, it should ideally be 1-2 pages long when converted to PDF. Focus on quality rather than quantity and make sure to include all the relevant information that can increase the candidate's chances of getting an interview call for the given job description.
                     `
 
-    const response = await generateContentWithModelFallback({
+    const response = await ai.models.generateContent({
+        model: "gemini-3-flash-preview",
         contents: prompt,
         config: {
             responseMimeType: "application/json",
