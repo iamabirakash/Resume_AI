@@ -3,11 +3,37 @@ const cookieParser = require("cookie-parser")
 const cors = require("cors")
 
 const app = express()
+const normalizeOrigin = (value = "") => value.trim().replace(/\/+$/, "").toLowerCase()
+const allowedOrigins = (process.env.CLIENT_URL || "http://localhost:5173")
+    .split(",")
+    .map((origin) => normalizeOrigin(origin))
+    .filter(Boolean)
 
 app.use(express.json())
 app.use(cookieParser())
 app.use(cors({
-    origin: process.env.CLIENT_URL || "http://localhost:5173",
+    origin: (origin, callback) => {
+        if (!origin) {
+            return callback(null, true)
+        }
+
+        const requestOrigin = normalizeOrigin(origin)
+        const isExactMatch = allowedOrigins.includes(requestOrigin)
+        const isAllowedVercelPreview = allowedOrigins.some((allowedOrigin) => {
+            if (!allowedOrigin.startsWith("https://") || !allowedOrigin.endsWith(".vercel.app")) {
+                return false
+            }
+
+            return requestOrigin.endsWith(".vercel.app")
+        })
+
+        if (isExactMatch || isAllowedVercelPreview) {
+            return callback(null, true)
+        }
+
+        console.log("Blocked by CORS:", requestOrigin, "Allowed:", allowedOrigins)
+        return callback(new Error("Not allowed by CORS"))
+    },
     credentials: true
 }))
 

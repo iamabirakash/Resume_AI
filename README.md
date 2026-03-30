@@ -36,7 +36,9 @@ Create a `Backend/.env` file with the required keys. Typical values include:
 PORT=5000
 MONGO_URI=your_mongodb_connection_string
 JWT_SECRET=your_jwt_secret
-GOOGLE_API_KEY=your_google_genai_key
+GOOGLE_GENAI_API_KEY=your_google_genai_key
+CLIENT_URL=http://localhost:5173
+BASE_URL=http://localhost:5000
 ```
 
 If you have additional keys in your local setup, include them here as needed.

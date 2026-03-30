@@ -2,6 +2,7 @@ const { GoogleGenAI } = require("@google/genai")
 const { z } = require("zod")
 const { zodToJsonSchema } = require("zod-to-json-schema")
 const puppeteer = require("puppeteer")
+const path = require("path")
 
 const ai = new GoogleGenAI({
     apiKey: process.env.GOOGLE_GENAI_API_KEY
@@ -137,22 +138,38 @@ async function generateInterviewReport({
 
 
 async function generatePdfFromHtml(htmlContent) {
-    const browser = await puppeteer.launch()
-    const page = await browser.newPage();
-    await page.setContent(htmlContent, { waitUntil: "networkidle0" })
+    process.env.PUPPETEER_CACHE_DIR = process.env.PUPPETEER_CACHE_DIR || path.join(__dirname, "../../.cache/puppeteer")
 
-    const pdfBuffer = await page.pdf({
-        format: "A4", margin: {
-            top: "20mm",
-            bottom: "20mm",
-            left: "15mm",
-            right: "15mm"
+    const executablePath = process.env.PUPPETEER_EXECUTABLE_PATH || puppeteer.executablePath()
+    let browser = null;
+    try {
+        browser = await puppeteer.launch({
+            executablePath,
+            headless: "new",
+            args: [ "--no-sandbox", "--disable-setuid-sandbox", "--disable-dev-shm-usage", "--disable-gpu" ]
+        })
+        const page = await browser.newPage();
+        await page.setContent(htmlContent, { waitUntil: "networkidle0" })
+
+        const pdfBuffer = await page.pdf({
+            format: "A4", margin: {
+                top: "20mm",
+                bottom: "20mm",
+                left: "15mm",
+                right: "15mm"
+            }
+        })
+
+        return pdfBuffer
+    } finally {
+        if (browser) {
+            try {
+                await browser.close()
+            } catch (err) {
+                console.error("Error closing browser:", err)
+            }
         }
-    })
-
-    await browser.close()
-
-    return pdfBuffer
+    }
 }
 
 async function generateResumePdf({ resume, selfDescription, jobDescription }) {

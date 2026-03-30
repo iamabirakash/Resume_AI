@@ -77,9 +77,9 @@ const STYLES = `
 
 /* ─── helpers ─────────────────────────────────────────────────────────────── */
 const NAV_ITEMS = [
-    { id: 'technical',  label: 'Technical',  icon: 'code'  },
+    { id: 'technical', label: 'Technical', icon: 'code' },
     { id: 'behavioral', label: 'Behavioral', icon: 'forum' },
-    { id: 'roadmap',    label: 'Roadmap',    icon: 'route' },
+    { id: 'roadmap', label: 'Roadmap', icon: 'route' },
 ]
 
 const scoreTheme = (score) => {
@@ -101,9 +101,9 @@ const scoreTheme = (score) => {
 }
 
 const severityBadge = (sev) => ({
-    high:   'bg-rose-50    text-rose-700    border-rose-200',
+    high: 'bg-rose-50    text-rose-700    border-rose-200',
     medium: 'bg-amber-50   text-amber-700   border-amber-200',
-    low:    'bg-emerald-50 text-emerald-700 border-emerald-200',
+    low: 'bg-emerald-50 text-emerald-700 border-emerald-200',
 }[sev] ?? 'bg-slate-100 text-slate-600 border-slate-200')
 
 /* ─── sub-components ─────────────────────────────────────────────────────── */
@@ -176,17 +176,16 @@ const RoadMapDay = ({ day }) => (
 )
 
 const LoadingView = () => (
-    <div className="min-h-screen bg-slate-50 flex items-center justify-center">
-        <div className="flex flex-col items-center gap-5 text-center max-w-sm">
-            <div className="w-12 h-12 rounded-full border-4 border-slate-200 border-t-teal-500 spin" />
-            <div>
-                <h1 className="font-display text-[26px] font-bold text-slate-900 italic">Loading your plan…</h1>
-                <p className="font-body-custom text-[14px] text-slate-500 mt-2 leading-relaxed">
-                    Assembling questions, match score and roadmap.
-                </p>
-            </div>
-        </div>
-    </div>
+    <main className="min-h-screen bg-slate-50 flex items-center justify-center flex-col gap-4 font-body-custom">
+        <style>{`
+            @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,700;1,900&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+            .font-body-custom { font-family: 'Plus Jakarta Sans', sans-serif; }
+            .font-display { font-family: 'Playfair Display', serif; }
+        `}</style>
+        <div className="w-12 h-12 border-4 border-teal-500 border-t-transparent rounded-full animate-spin"></div>
+        <h1 className="text-2xl font-display font-bold text-slate-800 tracking-tight">Loading your plan…</h1>
+        <p className="text-sm text-slate-500">Assembling questions, match score and roadmap.</p>
+    </main>
 )
 
 /* ─── main page ──────────────────────────────────────────────────────────── */
@@ -207,30 +206,30 @@ const Interview = () => {
     }
 
     const fetchQuote = async () => {
-            setQuoteLoading(true)
-            try {
-                const response = await fetch(`https://api.quotable.io/random?maxLength=140&t=${Date.now()}`, {
-                    method: "GET",
-                    cache: "no-store",
-                })
-                if (!response.ok) {
-                    throw new Error(`Quote API failed with status ${response.status}`)
-                }
-                const data = await response.json()
-                setAdviceQuote({
-                    content: data?.content || FALLBACK_QUOTES[0].content,
-                    author: data?.author || "Unknown",
-                })
-            } catch (error) {
-                setRandomFallbackQuote()
-            } finally {
-                setQuoteLoading(false)
+        setQuoteLoading(true)
+        try {
+            const response = await fetch(`https://api.quotable.io/random?maxLength=140&t=${Date.now()}`, {
+                method: "GET",
+                cache: "no-store",
+            })
+            if (!response.ok) {
+                throw new Error(`Quote API failed with status ${response.status}`)
             }
+            const data = await response.json()
+            setAdviceQuote({
+                content: data?.content || FALLBACK_QUOTES[0].content,
+                author: data?.author || "Unknown",
+            })
+        } catch (error) {
+            setRandomFallbackQuote()
+        } finally {
+            setQuoteLoading(false)
         }
-    
-        useEffect(() => {
-            fetchQuote()
-        }, [])
+    }
+
+    useEffect(() => {
+        fetchQuote()
+    }, [])
 
     if (loading || !report) return <LoadingView />
 
@@ -346,9 +345,8 @@ const Interview = () => {
                                     <button
                                         key={item.id}
                                         onClick={() => setActiveNav(item.id)}
-                                        className={`flex items-center gap-2.5 px-3 py-2.5 text-left w-full transition-all duration-150 ${
-                                            isActive ? 'nav-pill-active' : 'nav-pill-inactive'
-                                        }`}
+                                        className={`flex items-center gap-2.5 px-3 py-2.5 text-left w-full transition-all duration-150 ${isActive ? 'nav-pill-active' : 'nav-pill-inactive'
+                                            }`}
                                     >
                                         <span className="material-symbols-outlined" style={{ fontSize: 16 }}>{item.icon}</span>
                                         <span className="font-mono-code text-[11px] uppercase tracking-widest font-medium">{item.label}</span>

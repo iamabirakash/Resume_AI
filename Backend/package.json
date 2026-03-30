@@ -4,6 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
+    "start": "node server.js",
+    "postinstall": "npx puppeteer browsers install chrome --path ./.cache/puppeteer",
     "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "npx nodemon server.js"
   },
@@ -12,6 +14,7 @@
   "license": "ISC",
   "dependencies": {
     "@google/genai": "^1.42.0",
+    "axios": "^1.13.6",
     "bcryptjs": "^3.0.3",
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.6",
@@ -24,6 +27,7 @@
     "nodemon": "^3.1.14",
     "pdf-parse": "^2.4.5",
     "puppeteer": "^24.37.5",
+    "telegraf": "^4.16.3",
     "zod": "^3.25.76",
     "zod-to-json-schema": "^3.25.1"
   }
