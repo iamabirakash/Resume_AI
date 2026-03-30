@@ -1,0 +1,26 @@
+services:
+  - type: web
+    name: resume-ai-backend
+    env: node
+    rootDir: Backend
+    buildCommand: npm install
+    startCommand: npm start
+    envVars:
+      - key: NODE_VERSION
+        value: 18.18.0
+      - key: PUPPETEER_SKIP_CHROMIUM_DOWNLOAD
+        value: "false"
+      - key: PUPPETEER_CACHE_DIR
+        value: "/opt/render/project/src/Backend/.cache/puppeteer"
+      - key: CLIENT_URL
+        sync: false
+      - key: MONGO_URI
+        sync: false
+      - key: GOOGLE_GENAI_API_KEY
+        sync: false
+      - key: JWT_SECRET
+        sync: false
+      - key: TELEGRAM_BOT_TOKEN
+        sync: false
+      - key: WEBHOOK_DOMAIN
+        sync: false
