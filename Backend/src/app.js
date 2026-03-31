@@ -46,6 +46,25 @@ const interviewRouter = require("./routes/interview.routes")
 app.use("/api/auth", authRouter)
 app.use("/api/interview", interviewRouter)
 
+app.use((err, req, res, next) => {
+    if (err?.code === "LIMIT_FILE_SIZE") {
+        return res.status(413).json({
+            message: "Resume file is too large. Maximum allowed size is 5 MB."
+        })
+    }
+
+    if (err?.message === "Not allowed by CORS") {
+        return res.status(403).json({
+            message: "Request blocked by CORS policy."
+        })
+    }
+
+    console.error(err)
+    return res.status(500).json({
+        message: "Internal server error"
+    })
+})
+
 
 
 module.exports = app

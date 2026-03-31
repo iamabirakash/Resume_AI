@@ -2,6 +2,23 @@ const pdfParse = require("pdf-parse")
 const { generateInterviewReport, generateResumePdf } = require("../services/ai.service")
 const interviewReportModel = require("../models/interviewReport.model")
 
+function isPdfResumeFile(file) {
+    if (!file || !file.buffer) {
+        return false
+    }
+
+    const mimeType = (file.mimetype || "").toLowerCase()
+    if (mimeType === "application/pdf") {
+        return true
+    }
+
+    const fileName = (file.originalname || "").toLowerCase()
+    const hasPdfExtension = fileName.endsWith(".pdf")
+    const fileHeader = file.buffer.subarray(0, 5).toString("utf8")
+    const hasPdfSignature = fileHeader === "%PDF-"
+
+    return hasPdfExtension && hasPdfSignature
+}
 
 
 
@@ -9,15 +26,39 @@ const interviewReportModel = require("../models/interviewReport.model")
  * @description Controller to generate interview report based on user self description, resume and job description.
  */
 async function generateInterViewReportController(req, res) {
-
-    const resumeContent = await (new pdfParse.PDFParse(Uint8Array.from(req.file.buffer))).getText()
     const { selfDescription, jobDescription } = req.body
+    const resumeFile = req.file
+
+    if (!jobDescription?.trim()) {
+        return res.status(400).json({
+            message: "Job description is required."
+        })
+    }
+
+    if (!resumeFile && !selfDescription?.trim()) {
+        return res.status(400).json({
+            message: "Please upload a PDF resume or provide a candidate summary."
+        })
+    }
+
+    if (resumeFile && !isPdfResumeFile(resumeFile)) {
+        return res.status(400).json({
+            message: "Only PDF resume files are supported."
+        })
+    }
+
+    let resumeText = ""
+    if (resumeFile) {
+        const resumeContent = await (new pdfParse.PDFParse(Uint8Array.from(resumeFile.buffer))).getText()
+        resumeText = resumeContent.text || ""
+    }
+
     const roadmapDays = Number(req.body.roadmapDays)
     const technicalQuestionCount = Number(req.body.technicalQuestionCount)
     const behavioralQuestionCount = Number(req.body.behavioralQuestionCount)
 
     const interViewReportByAi = await generateInterviewReport({
-        resume: resumeContent.text,
+        resume: resumeText,
         selfDescription,
         jobDescription,
         roadmapDays,
@@ -27,7 +68,7 @@ async function generateInterViewReportController(req, res) {
 
     const interviewReport = await interviewReportModel.create({
         user: req.user.id,
-        resume: resumeContent.text,
+        resume: resumeText,
         selfDescription,
         jobDescription,
         ...interViewReportByAi

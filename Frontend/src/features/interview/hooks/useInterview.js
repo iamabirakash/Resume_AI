@@ -24,9 +24,8 @@ export const useInterview = () => {
         behavioralQuestionCount
     }) => {
         setLoading(true)
-        let response = null
         try {
-            response = await generateInterviewReport({
+            const response = await generateInterviewReport({
                 jobDescription,
                 selfDescription,
                 resumeFile,
@@ -35,13 +34,14 @@ export const useInterview = () => {
                 behavioralQuestionCount
             })
             setReport(response.interviewReport)
+            return response.interviewReport
         } catch (error) {
             console.log(error)
+            const message = error?.response?.data?.message || "Unable to analyze resume right now. Please try again."
+            throw new Error(message)
         } finally {
             setLoading(false)
         }
-
-        return response.interviewReport
     }
 
     const getReportById = async (interviewId) => {
@@ -58,8 +58,10 @@ export const useInterview = () => {
         return response.interviewReport
     }
 
-    const getReports = async () => {
-        setLoading(true)
+    const getReports = async ({ silent = false } = {}) => {
+        if (!silent) {
+            setLoading(true)
+        }
         let response = null
         try {
             response = await getAllInterviewReports()
@@ -67,10 +69,12 @@ export const useInterview = () => {
         } catch (error) {
             console.log(error)
         } finally {
-            setLoading(false)
+            if (!silent) {
+                setLoading(false)
+            }
         }
 
-        return response.interviewReports
+        return response?.interviewReports || []
     }
 
     const getResumePdf = async (interviewReportId) => {
@@ -97,6 +101,32 @@ export const useInterview = () => {
             getReportById(interviewId)
         } else {
             getReports()
+        }
+    }, [ interviewId ])
+
+    useEffect(() => {
+        if (interviewId) {
+            return
+        }
+
+        const syncReports = () => {
+            getReports({ silent: true })
+        }
+
+        const handleVisibilityChange = () => {
+            if (document.visibilityState === "visible") {
+                syncReports()
+            }
+        }
+
+        window.addEventListener("focus", syncReports)
+        document.addEventListener("visibilitychange", handleVisibilityChange)
+        const intervalId = window.setInterval(syncReports, 15000)
+
+        return () => {
+            window.removeEventListener("focus", syncReports)
+            document.removeEventListener("visibilitychange", handleVisibilityChange)
+            window.clearInterval(intervalId)
         }
     }, [ interviewId ])
 
