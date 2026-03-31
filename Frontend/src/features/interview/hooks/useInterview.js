@@ -24,9 +24,8 @@ export const useInterview = () => {
         behavioralQuestionCount
     }) => {
         setLoading(true)
-        let response = null
         try {
-            response = await generateInterviewReport({
+            const response = await generateInterviewReport({
                 jobDescription,
                 selfDescription,
                 resumeFile,
@@ -35,13 +34,14 @@ export const useInterview = () => {
                 behavioralQuestionCount
             })
             setReport(response.interviewReport)
+            return response.interviewReport
         } catch (error) {
             console.log(error)
+            const message = error?.response?.data?.message || "Unable to analyze resume right now. Please try again."
+            throw new Error(message)
         } finally {
             setLoading(false)
         }
-
-        return response.interviewReport
     }
 
     const getReportById = async (interviewId) => {

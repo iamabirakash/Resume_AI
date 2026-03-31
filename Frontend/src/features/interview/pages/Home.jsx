@@ -21,6 +21,7 @@ const Home = () => {
     const [searchQuery, setSearchQuery] = useState("")
     const [adviceQuote, setAdviceQuote] = useState(FALLBACK_QUOTES[0])
     const [quoteLoading, setQuoteLoading] = useState(false)
+    const [submitError, setSubmitError] = useState("")
     const resumeInputRef = useRef()
     const navigate = useNavigate()
     const filteredReports = (reports || []).filter((report) => {
@@ -64,16 +65,33 @@ const Home = () => {
 
     const handleGenerateReport = async () => {
         const resumeFile = resumeInputRef.current?.files?.[0]
-        const data = await generateReport({
-            jobDescription,
-            selfDescription,
-            resumeFile,
-            roadmapDays,
-            technicalQuestionCount,
-            behavioralQuestionCount
-        })
-        if (data && data._id) {
-            navigate(`/interview/${data._id}`)
+        setSubmitError("")
+
+        if (!jobDescription.trim()) {
+            setSubmitError("Job description is required.")
+            return
+        }
+
+        if (!resumeFile && !selfDescription.trim()) {
+            setSubmitError("Please upload a PDF resume or provide a candidate summary.")
+            return
+        }
+
+        try {
+            const data = await generateReport({
+                jobDescription,
+                selfDescription,
+                resumeFile,
+                roadmapDays,
+                technicalQuestionCount,
+                behavioralQuestionCount
+            })
+
+            if (data && data._id) {
+                navigate(`/interview/${data._id}`)
+            }
+        } catch (error) {
+            setSubmitError(error.message || "Unable to analyze resume right now. Please try again.")
         }
     }
 
@@ -271,7 +289,10 @@ const Home = () => {
                                 rows={9}
                                 maxLength={5000}
                                 value={jobDescription}
-                                onChange={(e) => setJobDescription(e.target.value)}
+                                onChange={(e) => {
+                                    setSubmitError("")
+                                    setJobDescription(e.target.value)
+                                }}
                                 placeholder="Paste the full job description here...&#10;e.g. 'Senior Frontend Engineer requires proficiency in React...'"
                                 className="field-ul text-[15px] text-gray-500 leading-relaxed"
                             />
@@ -289,21 +310,22 @@ const Home = () => {
                             </div>
 
                             {/* Upload zone */}
-                            <label htmlFor="resume-upload" className="block border-2 border-dashed border-slate-300 hover:border-teal-400 bg-linear-to-br from-slate-50 to-teal-50/50 hover:to-teal-100/40 transition-all duration-300 p-10 flex-col items-center justify-center cursor-pointer group mb-8">
+                            <label htmlFor="resume-upload" className="block border-2 border-dashed border-slate-300 hover:border-teal-400 bg-linear-to-br from-slate-50 to-teal-50/50 hover:to-teal-100/40 transition-all duration-300 p-10 flex flex-col items-center justify-center cursor-pointer group mb-8">
                                 <div className="w-12 h-12 rounded-full bg-teal-100 group-hover:bg-teal-200 flex items-center justify-center mb-3 transition-colors duration-200">
                                     <span className="material-symbols-outlined text-teal-600" style={{ fontSize: 22, fontVariationSettings: "'FILL' 1" }}>upload_file</span>
                                 </div>
                                 <p className="font-body-custom text-[15px] font-semibold text-slate-700 mb-1">
                                     {resumeInputRef.current?.files?.[0] ? resumeInputRef.current.files[0].name : "Upload Resume"}
                                 </p>
-                                <p className="font-mono-code text-[10px] text-slate-400 uppercase tracking-widest">PDF, DOCX — max 5 MB</p>
+                                <p className="font-mono-code text-[10px] text-slate-400 uppercase tracking-widest">PDF only - max 5 MB</p>
                                 <input
                                     ref={resumeInputRef}
                                     type="file"
                                     id="resume-upload"
                                     className="hidden"
-                                    accept=".pdf,.docx"
+                                    accept=".pdf,application/pdf"
                                     onChange={(e) => {
+                                        setSubmitError("")
                                         // Simple trick to force re-render so the filename shows above
                                         setSelfDescription((prev) => prev + " ")
                                         setTimeout(() => setSelfDescription((prev) => prev.trimEnd()), 0)
@@ -323,7 +345,10 @@ const Home = () => {
                                 <input
                                     type="text"
                                     value={selfDescription}
-                                    onChange={(e) => setSelfDescription(e.target.value)}
+                                    onChange={(e) => {
+                                        setSubmitError("")
+                                        setSelfDescription(e.target.value)
+                                    }}
                                     placeholder="E.g. Frontend developer with 5+ years in SaaS and React..."
                                     className="field-ul text-[15px]"
                                 />
@@ -333,6 +358,11 @@ const Home = () => {
                                 <span className="material-symbols-outlined" style={{ fontSize: 16 }}>info</span>
                                 <span className="font-mono-code text-[10px] uppercase tracking-wider">Provide a Resume OR a Candidate Summary to proceed</span>
                             </div>
+                            {submitError && (
+                                <div className="mt-3 border border-rose-200 bg-rose-50 px-3 py-2 text-rose-700 rounded">
+                                    <span className="font-mono-code text-[10px] uppercase tracking-wider">{submitError}</span>
+                                </div>
+                            )}
                         </section>
 
                         <div className="mb-8 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 fade-up delay-3">
