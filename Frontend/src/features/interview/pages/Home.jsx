@@ -11,7 +11,8 @@ const FALLBACK_QUOTES = [
 
 const Home = () => {
     const { loading, generateReport, reports } = useInterview()
-    const { user } = useAuth()
+    const { user, handleLogout } = useAuth()
+    const [isLoggingOut, setIsLoggingOut] = useState(false)
     const [jobDescription, setJobDescription] = useState("")
     const [selfDescription, setSelfDescription] = useState("")
     const [roadmapDays, setRoadmapDays] = useState(25)
@@ -73,6 +74,16 @@ const Home = () => {
         })
         if (data && data._id) {
             navigate(`/interview/${data._id}`)
+        }
+    }
+
+    const onLogout = async () => {
+        setIsLoggingOut(true)
+        try {
+            await handleLogout()
+            navigate('/login')
+        } finally {
+            setIsLoggingOut(false)
         }
     }
 
@@ -198,6 +209,13 @@ const Home = () => {
                         <span className="font-mono-code text-[11px] uppercase tracking-widest text-slate-600 hidden sm:inline">
                             {user?.username || "User"}
                         </span>
+                        <button
+                            onClick={onLogout}
+                            disabled={isLoggingOut}
+                            className="font-mono-code text-[10px] uppercase tracking-widest text-slate-500 hover:text-slate-800 transition-colors disabled:opacity-60"
+                        >
+                            {isLoggingOut ? "Logging out..." : "Logout"}
+                        </button>
                         <div className="w-8 h-8 rounded-full overflow-hidden ring-2 ring-teal-300">
                             <img
                                 src="https://lh3.googleusercontent.com/aida-public/AB6AXuADNU5lyUwVJr_dVZapvCguK0InTZum0M2xFhZcVRztLudTi5lTRUc4VB9UMybmVD1wPoWcYA_YOXyBY7VL4mUMTN4UJTEEQT_bHVTdvXMkDp1KUiT-uazwQlS-d5WC8aTdGnNx1GWbEzPIsTcRH5z3D2pdxsm_ZZRBAuiffISRMSkP7hO3mPqJOzA11jN7AZH-WCVlTvS304I8fq74i2giU19Nr8OQ0XwqESOeO0trUNixAQp7RN5nbFQ9A2x1aqMmf2WR-G33"
