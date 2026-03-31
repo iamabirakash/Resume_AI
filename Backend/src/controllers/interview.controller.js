@@ -2,6 +2,23 @@ const pdfParse = require("pdf-parse")
 const { generateInterviewReport, generateResumePdf } = require("../services/ai.service")
 const interviewReportModel = require("../models/interviewReport.model")
 
+function isPdfResumeFile(file) {
+    if (!file || !file.buffer) {
+        return false
+    }
+
+    const mimeType = (file.mimetype || "").toLowerCase()
+    if (mimeType === "application/pdf") {
+        return true
+    }
+
+    const fileName = (file.originalname || "").toLowerCase()
+    const hasPdfExtension = fileName.endsWith(".pdf")
+    const fileHeader = file.buffer.subarray(0, 5).toString("utf8")
+    const hasPdfSignature = fileHeader === "%PDF-"
+
+    return hasPdfExtension && hasPdfSignature
+}
 
 
 
@@ -24,7 +41,7 @@ async function generateInterViewReportController(req, res) {
         })
     }
 
-    if (resumeFile && resumeFile.mimetype !== "application/pdf") {
+    if (resumeFile && !isPdfResumeFile(resumeFile)) {
         return res.status(400).json({
             message: "Only PDF resume files are supported."
         })
