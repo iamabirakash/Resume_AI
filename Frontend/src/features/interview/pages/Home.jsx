@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react'
 import { useInterview } from '../hooks/useInterview.js'
 import { useNavigate } from 'react-router'
+import { useAuth } from '../../auth/hooks/useAuth.js'
 
 const FALLBACK_QUOTES = [
     { content: "Success is where preparation and opportunity meet.", author: "Bobby Unser" },
@@ -10,6 +11,7 @@ const FALLBACK_QUOTES = [
 
 const Home = () => {
     const { loading, generateReport, reports } = useInterview()
+    const { user } = useAuth()
     const [jobDescription, setJobDescription] = useState("")
     const [selfDescription, setSelfDescription] = useState("")
     const [roadmapDays, setRoadmapDays] = useState(25)
@@ -193,6 +195,9 @@ const Home = () => {
                         <button className="text-slate-400 hover:text-slate-700 transition-colors p-1">
                             <span className="material-symbols-outlined" style={{ fontSize: 20 }}>settings</span>
                         </button>
+                        <span className="font-mono-code text-[11px] uppercase tracking-widest text-slate-600 hidden sm:inline">
+                            {user?.username || "User"}
+                        </span>
                         <div className="w-8 h-8 rounded-full overflow-hidden ring-2 ring-teal-300">
                             <img
                                 src="https://lh3.googleusercontent.com/aida-public/AB6AXuADNU5lyUwVJr_dVZapvCguK0InTZum0M2xFhZcVRztLudTi5lTRUc4VB9UMybmVD1wPoWcYA_YOXyBY7VL4mUMTN4UJTEEQT_bHVTdvXMkDp1KUiT-uazwQlS-d5WC8aTdGnNx1GWbEzPIsTcRH5z3D2pdxsm_ZZRBAuiffISRMSkP7hO3mPqJOzA11jN7AZH-WCVlTvS304I8fq74i2giU19Nr8OQ0XwqESOeO0trUNixAQp7RN5nbFQ9A2x1aqMmf2WR-G33"
