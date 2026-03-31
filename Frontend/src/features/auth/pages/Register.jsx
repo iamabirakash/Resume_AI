@@ -12,8 +12,12 @@ const Register = () => {
 
     const handleSubmit = async (e) => {
         e.preventDefault()
-        await handleRegister({ username, email, password })
-        navigate('/')
+        try {
+            await handleRegister({ username, email, password })
+            navigate('/')
+        } catch (error) {
+            // Keep user on register page when registration fails.
+        }
     }
 
     if (loading) {
