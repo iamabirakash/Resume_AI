@@ -22,7 +22,16 @@ const Home = () => {
     const [adviceQuote, setAdviceQuote] = useState(FALLBACK_QUOTES[0])
     const [quoteLoading, setQuoteLoading] = useState(false)
     const [submitError, setSubmitError] = useState("")
+    const [isUserMenuOpen, setIsUserMenuOpen] = useState(false)
+    const [isDarkMode, setIsDarkMode] = useState(() => {
+        if (typeof window === "undefined") return false
+        const savedTheme = window.localStorage.getItem("resume-theme")
+        if (savedTheme === "dark") return true
+        if (savedTheme === "light") return false
+        return window.matchMedia?.("(prefers-color-scheme: dark)")?.matches ?? false
+    })
     const resumeInputRef = useRef()
+    const userMenuRef = useRef()
     const navigate = useNavigate()
     const filteredReports = (reports || []).filter((report) => {
         const q = searchQuery.trim().toLowerCase()
@@ -61,6 +70,21 @@ const Home = () => {
 
     useEffect(() => {
         fetchQuote()
+    }, [])
+
+    useEffect(() => {
+        document.documentElement.classList.toggle("theme-dark", isDarkMode)
+        window.localStorage.setItem("resume-theme", isDarkMode ? "dark" : "light")
+    }, [isDarkMode])
+
+    useEffect(() => {
+        const handleClickOutside = (event) => {
+            if (userMenuRef.current && !userMenuRef.current.contains(event.target)) {
+                setIsUserMenuOpen(false)
+            }
+        }
+        document.addEventListener("mousedown", handleClickOutside)
+        return () => document.removeEventListener("mousedown", handleClickOutside)
     }, [])
 
     const handleGenerateReport = async () => {
@@ -190,6 +214,24 @@ const Home = () => {
                 .delay-2   { animation-delay: 0.16s; }
                 .delay-3   { animation-delay: 0.24s; }
                 .delay-4   { animation-delay: 0.32s; }
+
+                .theme-dark [class*="bg-slate-50"] { background-color: #020617 !important; }
+                .theme-dark [class*="bg-white"] { background-color: #0f172a !important; }
+                .theme-dark [class*="text-slate-900"] { color: #f8fafc !important; }
+                .theme-dark [class*="text-slate-800"] { color: #f1f5f9 !important; }
+                .theme-dark [class*="text-slate-700"] { color: #e2e8f0 !important; }
+                .theme-dark [class*="text-slate-600"] { color: #cbd5e1 !important; }
+                .theme-dark [class*="text-slate-500"] { color: #94a3b8 !important; }
+                .theme-dark [class*="text-slate-400"] { color: #64748b !important; }
+                .theme-dark [class*="text-black"] { color: #f8fafc !important; }
+                .theme-dark [class*="border-slate-300"] { border-color: #334155 !important; }
+                .theme-dark [class*="border-slate-200"] { border-color: #1e293b !important; }
+                .theme-dark .field-ul {
+                    color: #e2e8f0;
+                    border-bottom-color: #334155;
+                }
+                .theme-dark .field-ul::placeholder { color: #64748b; }
+                .theme-dark .plan-row:hover { background: #0b1220; }
             `}</style>
 
             {/* ── NAV ──────────────────────────────────────────────────────────── */}
@@ -218,28 +260,43 @@ const Home = () => {
                                 className="font-mono-code text-[11px] bg-transparent border-b border-slate-300 outline-none pl-6 pr-2 py-1.5 w-44 text-black placeholder:text-slate-400 focus:border-teal-500 transition-colors"
                             />
                         </div>
-                        <button className="text-slate-400 hover:text-slate-700 transition-colors p-1">
-                            <span className="material-symbols-outlined" style={{ fontSize: 20 }}>notifications</span>
-                        </button>
-                        <button className="text-slate-400 hover:text-slate-700 transition-colors p-1">
-                            <span className="material-symbols-outlined" style={{ fontSize: 20 }}>settings</span>
-                        </button>
-                        <span className="font-mono-code text-[11px] uppercase tracking-widest text-slate-600 hidden sm:inline">
-                            {user?.username || "User"}
-                        </span>
                         <button
-                            onClick={onLogout}
-                            disabled={isLoggingOut}
-                            className="font-mono-code text-[10px] uppercase tracking-widest text-slate-500 hover:text-slate-800 transition-colors disabled:opacity-60"
+                            onClick={() => setIsDarkMode((prev) => !prev)}
+                            className="text-slate-400 hover:text-slate-700 transition-colors p-1"
+                            aria-label={isDarkMode ? "Switch to light mode" : "Switch to dark mode"}
+                            title={isDarkMode ? "Switch to light mode" : "Switch to dark mode"}
                         >
-                            {isLoggingOut ? "Logging out..." : "Logout"}
+                            <span className="material-symbols-outlined" style={{ fontSize: 20 }}>
+                                {isDarkMode ? "light_mode" : "dark_mode"}
+                            </span>
                         </button>
-                        <div className="w-8 h-8 rounded-full overflow-hidden ring-2 ring-teal-300">
-                            <img
-                                src="https://lh3.googleusercontent.com/aida-public/AB6AXuADNU5lyUwVJr_dVZapvCguK0InTZum0M2xFhZcVRztLudTi5lTRUc4VB9UMybmVD1wPoWcYA_YOXyBY7VL4mUMTN4UJTEEQT_bHVTdvXMkDp1KUiT-uazwQlS-d5WC8aTdGnNx1GWbEzPIsTcRH5z3D2pdxsm_ZZRBAuiffISRMSkP7hO3mPqJOzA11jN7AZH-WCVlTvS304I8fq74i2giU19Nr8OQ0XwqESOeO0trUNixAQp7RN5nbFQ9A2x1aqMmf2WR-G33"
-                                alt="User"
-                                className="w-full h-full object-cover"
-                            />
+                        <div className="relative" ref={userMenuRef}>
+                            <button
+                                type="button"
+                                onClick={() => setIsUserMenuOpen((prev) => !prev)}
+                                className="w-8 h-8 rounded-full overflow-hidden ring-2 ring-teal-300"
+                                aria-label="Open user menu"
+                            >
+                                <img
+                                    src="https://lh3.googleusercontent.com/aida-public/AB6AXuADNU5lyUwVJr_dVZapvCguK0InTZum0M2xFhZcVRztLudTi5lTRUc4VB9UMybmVD1wPoWcYA_YOXyBY7VL4mUMTN4UJTEEQT_bHVTdvXMkDp1KUiT-uazwQlS-d5WC8aTdGnNx1GWbEzPIsTcRH5z3D2pdxsm_ZZRBAuiffISRMSkP7hO3mPqJOzA11jN7AZH-WCVlTvS304I8fq74i2giU19Nr8OQ0XwqESOeO0trUNixAQp7RN5nbFQ9A2x1aqMmf2WR-G33"
+                                    alt="User"
+                                    className="w-full h-full object-cover"
+                                />
+                            </button>
+                            {isUserMenuOpen && (
+                                <div className="absolute right-0 top-11 min-w-40 border border-slate-200 bg-white shadow-lg p-3 z-50">
+                                    <p className="font-mono-code text-[11px] uppercase tracking-widest text-slate-700 mb-2">
+                                        {user?.username || "User"}
+                                    </p>
+                                    <button
+                                        onClick={onLogout}
+                                        disabled={isLoggingOut}
+                                        className="w-full text-center font-mono-code text-[10px] uppercase tracking-widest text-slate-500 hover:text-slate-800 transition-colors disabled:opacity-60"
+                                    >
+                                        {isLoggingOut ? "Logging out..." : "Logout"}
+                                    </button>
+                                </div>
+                            )}
                         </div>
                     </div>
                 </div>

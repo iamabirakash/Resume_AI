@@ -193,6 +193,13 @@ const Interview = () => {
     const [activeNav, setActiveNav] = useState('technical')
     const [adviceQuote, setAdviceQuote] = useState(FALLBACK_QUOTES[0])
     const [quoteLoading, setQuoteLoading] = useState(false)
+    const [isDarkMode, setIsDarkMode] = useState(() => {
+        if (typeof window === "undefined") return false
+        const savedTheme = window.localStorage.getItem("resume-theme")
+        if (savedTheme === "dark") return true
+        if (savedTheme === "light") return false
+        return window.matchMedia?.("(prefers-color-scheme: dark)")?.matches ?? false
+    })
     const { report, getReportById, loading, getResumePdf } = useInterview()
     const { interviewId } = useParams()
 
@@ -231,6 +238,11 @@ const Interview = () => {
         fetchQuote()
     }, [])
 
+    useEffect(() => {
+        document.documentElement.classList.toggle("theme-dark", isDarkMode)
+        window.localStorage.setItem("resume-theme", isDarkMode ? "dark" : "light")
+    }, [isDarkMode])
+
     if (loading || !report) return <LoadingView />
 
     const score = scoreTheme(report.matchScore)
@@ -265,6 +277,20 @@ const Interview = () => {
     return (
         <div className="min-h-screen bg-slate-50 antialiased font-body-custom">
             <style>{STYLES}</style>
+            <style>{`
+                .theme-dark [class*="bg-slate-50"] { background-color: #020617 !important; }
+                .theme-dark [class*="bg-white"] { background-color: #0f172a !important; }
+                .theme-dark [class*="text-slate-900"] { color: #f8fafc !important; }
+                .theme-dark [class*="text-slate-800"] { color: #f1f5f9 !important; }
+                .theme-dark [class*="text-slate-700"] { color: #e2e8f0 !important; }
+                .theme-dark [class*="text-slate-600"] { color: #cbd5e1 !important; }
+                .theme-dark [class*="text-slate-500"] { color: #94a3b8 !important; }
+                .theme-dark [class*="text-slate-400"] { color: #64748b !important; }
+                .theme-dark [class*="border-slate-300"] { border-color: #334155 !important; }
+                .theme-dark [class*="border-slate-200"] { border-color: #1e293b !important; }
+                .theme-dark .q-row:hover { background: #0b1220; }
+                .theme-dark .nav-pill-inactive:hover { background: #0b1220; color: #f8fafc; }
+            `}</style>
 
             {/* ── NAV ──────────────────────────────────────────────────────── */}
             <nav className="fixed top-0 left-0 right-0 z-50 bg-slate-50/90 backdrop-blur-md border-b border-slate-200">
@@ -280,11 +306,15 @@ const Interview = () => {
                         </div>
                     </div>
                     <div className="flex items-center gap-5">
-                        <button className="text-slate-400 hover:text-slate-700 transition-colors p-1">
-                            <span className="material-symbols-outlined" style={{ fontSize: 20 }}>notifications</span>
-                        </button>
-                        <button className="text-slate-400 hover:text-slate-700 transition-colors p-1">
-                            <span className="material-symbols-outlined" style={{ fontSize: 20 }}>settings</span>
+                        <button
+                            onClick={() => setIsDarkMode((prev) => !prev)}
+                            className="text-slate-400 hover:text-slate-700 transition-colors p-1"
+                            aria-label={isDarkMode ? "Switch to light mode" : "Switch to dark mode"}
+                            title={isDarkMode ? "Switch to light mode" : "Switch to dark mode"}
+                        >
+                            <span className="material-symbols-outlined" style={{ fontSize: 20 }}>
+                                {isDarkMode ? "light_mode" : "dark_mode"}
+                            </span>
                         </button>
                         <div className="w-8 h-8 rounded-full overflow-hidden ring-2 ring-teal-300">
                             <img
