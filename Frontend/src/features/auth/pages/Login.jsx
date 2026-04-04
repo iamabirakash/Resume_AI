@@ -103,12 +103,12 @@ const Login = () => {
                                 >
                                     Password
                                 </label>
-                                <a
+                                {/* <a
                                     className="text-xs font-semibold text-[#004c6e] underline-offset-4 hover:underline"
                                     href="#"
                                 >
                                     Forgot Password?
-                                </a>
+                                </a> */}
                             </div>
                             <div className="relative">
                                 <input
