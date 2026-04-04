@@ -1,8 +1,18 @@
 import React, { useState } from 'react'
 import { Link, useNavigate } from 'react-router'
 import { useAuth } from '../hooks/useAuth'
+import { useSeo } from '../../../shared/seo/useSeo'
 
 const Register = () => {
+    useSeo({
+        title: "Create Account",
+        description: "Create your Resume Analyzer AI account and get AI-powered resume optimization, skill-gap analysis, and interview preparation plans.",
+        canonicalPath: "/register",
+        keywords: ["create resume ai account", "resume optimizer", "AI interview preparation", "resume analysis tool"],
+        robots: "index,follow",
+        ogType: "website",
+    })
+
     const { loading, handleRegister } = useAuth()
     const navigate = useNavigate()
 

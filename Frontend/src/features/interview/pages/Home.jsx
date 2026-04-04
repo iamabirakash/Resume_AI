@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from 'react'
 import { useInterview } from '../hooks/useInterview.js'
 import { useNavigate } from 'react-router'
 import { useAuth } from '../../auth/hooks/useAuth.js'
+import { useSeo } from '../../../shared/seo/useSeo.js'
 
 const FALLBACK_QUOTES = [
     { content: "Success is where preparation and opportunity meet.", author: "Bobby Unser" },
@@ -10,6 +11,15 @@ const FALLBACK_QUOTES = [
 ]
 
 const Home = () => {
+    useSeo({
+        title: "Resume Match Dashboard",
+        description: "Private dashboard for generating AI resume match reports and interview preparation plans.",
+        canonicalPath: "/",
+        keywords: ["resume dashboard", "resume report", "interview preparation plan"],
+        robots: "noindex,nofollow",
+        ogType: "website",
+    })
+
     const { loading, generateReport, reports } = useInterview()
     const { user, handleLogout } = useAuth()
     const [isLoggingOut, setIsLoggingOut] = useState(false)

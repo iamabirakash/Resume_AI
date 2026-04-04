@@ -1,8 +1,18 @@
 import React, { useState } from 'react'
 import { Link, useNavigate } from 'react-router'
 import { useAuth } from '../hooks/useAuth'
+import { useSeo } from '../../../shared/seo/useSeo'
 
 const Login = () => {
+    useSeo({
+        title: "Login",
+        description: "Sign in to Resume Analyzer AI to analyze your resume, improve role match scores, and prepare smarter for interviews.",
+        canonicalPath: "/login",
+        keywords: ["resume analyzer login", "AI resume checker", "interview prep AI", "resume match score"],
+        robots: "index,follow",
+        ogType: "website",
+    })
+
     const { loading, handleLogin } = useAuth()
     const navigate = useNavigate()
 

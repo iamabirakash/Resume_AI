@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from 'react'
 import { useNavigate, useParams } from 'react-router'
 import { useInterview } from '../hooks/useInterview.js'
 import { useAuth } from '../../auth/hooks/useAuth.js'
+import { useSeo } from '../../../shared/seo/useSeo.js'
 
 const FALLBACK_QUOTES = [
     { content: "Success is where preparation and opportunity meet.", author: "Bobby Unser" },
@@ -191,6 +192,17 @@ const LoadingView = () => (
 
 /* ─── main page ──────────────────────────────────────────────────────────── */
 const Interview = () => {
+    const { interviewId } = useParams()
+
+    useSeo({
+        title: "Interview Report",
+        description: "Private interview report with match score, skill gaps, and roadmap.",
+        canonicalPath: interviewId ? `/interview/${interviewId}` : "/interview",
+        keywords: ["interview report", "resume match insights", "skill gap analysis"],
+        robots: "noindex,nofollow,noarchive,nosnippet",
+        ogType: "article",
+    })
+
     const [activeNav, setActiveNav] = useState('technical')
     const [adviceQuote, setAdviceQuote] = useState(FALLBACK_QUOTES[0])
     const [quoteLoading, setQuoteLoading] = useState(false)
@@ -207,7 +219,6 @@ const Interview = () => {
     const navigate = useNavigate()
     const { user, handleLogout } = useAuth()
     const { report, getReportById, loading, getResumePdf } = useInterview()
-    const { interviewId } = useParams()
 
     useEffect(() => {
         if (interviewId) getReportById(interviewId)
