@@ -1,6 +1,7 @@
-import React, { useEffect, useState } from 'react'
-import { useParams } from 'react-router'
+import React, { useEffect, useRef, useState } from 'react'
+import { useNavigate, useParams } from 'react-router'
 import { useInterview } from '../hooks/useInterview.js'
+import { useAuth } from '../../auth/hooks/useAuth.js'
 
 const FALLBACK_QUOTES = [
     { content: "Success is where preparation and opportunity meet.", author: "Bobby Unser" },
@@ -193,6 +194,8 @@ const Interview = () => {
     const [activeNav, setActiveNav] = useState('technical')
     const [adviceQuote, setAdviceQuote] = useState(FALLBACK_QUOTES[0])
     const [quoteLoading, setQuoteLoading] = useState(false)
+    const [isUserMenuOpen, setIsUserMenuOpen] = useState(false)
+    const [isLoggingOut, setIsLoggingOut] = useState(false)
     const [isDarkMode, setIsDarkMode] = useState(() => {
         if (typeof window === "undefined") return false
         const savedTheme = window.localStorage.getItem("resume-theme")
@@ -200,6 +203,9 @@ const Interview = () => {
         if (savedTheme === "light") return false
         return window.matchMedia?.("(prefers-color-scheme: dark)")?.matches ?? false
     })
+    const userMenuRef = useRef()
+    const navigate = useNavigate()
+    const { user, handleLogout } = useAuth()
     const { report, getReportById, loading, getResumePdf } = useInterview()
     const { interviewId } = useParams()
 
@@ -242,6 +248,26 @@ const Interview = () => {
         document.documentElement.classList.toggle("theme-dark", isDarkMode)
         window.localStorage.setItem("resume-theme", isDarkMode ? "dark" : "light")
     }, [isDarkMode])
+
+    useEffect(() => {
+        const handleClickOutside = (event) => {
+            if (userMenuRef.current && !userMenuRef.current.contains(event.target)) {
+                setIsUserMenuOpen(false)
+            }
+        }
+        document.addEventListener("mousedown", handleClickOutside)
+        return () => document.removeEventListener("mousedown", handleClickOutside)
+    }, [])
+
+    const onLogout = async () => {
+        setIsLoggingOut(true)
+        try {
+            await handleLogout()
+            navigate('/login')
+        } finally {
+            setIsLoggingOut(false)
+        }
+    }
 
     if (loading || !report) return <LoadingView />
 
@@ -316,11 +342,39 @@ const Interview = () => {
                                 {isDarkMode ? "light_mode" : "dark_mode"}
                             </span>
                         </button>
-                        <div className="w-8 h-8 rounded-full overflow-hidden ring-2 ring-teal-300">
-                            <img
-                                src="https://lh3.googleusercontent.com/aida-public/AB6AXuADNU5lyUwVJr_dVZapvCguK0InTZum0M2xFhZcVRztLudTi5lTRUc4VB9UMybmVD1wPoWcYA_YOXyBY7VL4mUMTN4UJTEEQT_bHVTdvXMkDp1KUiT-uazwQlS-d5WC8aTdGnNx1GWbEzPIsTcRH5z3D2pdxsm_ZZRBAuiffISRMSkP7hO3mPqJOzA11jN7AZH-WCVlTvS304I8fq74i2giU19Nr8OQ0XwqESOeO0trUNixAQp7RN5nbFQ9A2x1aqMmf2WR-G33"
-                                alt="User" className="w-full h-full object-cover"
-                            />
+                        <div className="relative" ref={userMenuRef}>
+                            <button
+                                type="button"
+                                onClick={() => setIsUserMenuOpen((prev) => !prev)}
+                                className="w-9 h-9 rounded-full overflow-hidden ring-2 ring-teal-300 hover:ring-teal-400 hover:shadow-md hover:shadow-teal-500/20 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-teal-500/70"
+                                aria-label="Open user menu"
+                            >
+                                <img
+                                    src="https://lh3.googleusercontent.com/aida-public/AB6AXuADNU5lyUwVJr_dVZapvCguK0InTZum0M2xFhZcVRztLudTi5lTRUc4VB9UMybmVD1wPoWcYA_YOXyBY7VL4mUMTN4UJTEEQT_bHVTdvXMkDp1KUiT-uazwQlS-d5WC8aTdGnNx1GWbEzPIsTcRH5z3D2pdxsm_ZZRBAuiffISRMSkP7hO3mPqJOzA11jN7AZH-WCVlTvS304I8fq74i2giU19Nr8OQ0XwqESOeO0trUNixAQp7RN5nbFQ9A2x1aqMmf2WR-G33"
+                                    alt="User"
+                                    className="w-full h-full object-cover"
+                                />
+                            </button>
+                            {isUserMenuOpen && (
+                                <div className="absolute right-0 top-12 min-w-52 overflow-hidden rounded-xl border border-slate-200 bg-white shadow-[0_16px_40px_rgba(15,23,42,0.15)] z-50">
+                                    <div className="h-1 bg-linear-to-r from-teal-500 via-teal-400 to-emerald-500" />
+                                    <div className="px-4 py-3.5">
+                                        <p className="font-mono-code text-[9px] uppercase tracking-[0.2em] text-slate-400 mb-2 text-center">
+                                            Profile
+                                        </p>
+                                        <p className="font-mono-code text-[11px] uppercase tracking-widest text-slate-700 mb-3 text-center border border-slate-200 bg-slate-50 px-3 py-2">
+                                            {user?.username || "User"}
+                                        </p>
+                                        <button
+                                            onClick={onLogout}
+                                            disabled={isLoggingOut}
+                                            className="w-full text-center font-mono-code text-[10px] uppercase tracking-widest text-slate-600 border border-slate-300 bg-white hover:bg-slate-50 hover:text-slate-900 transition-colors py-2.5 disabled:opacity-60"
+                                        >
+                                            {isLoggingOut ? "Logging out..." : "Logout"}
+                                        </button>
+                                    </div>
+                                </div>
+                            )}
                         </div>
                     </div>
                 </div>

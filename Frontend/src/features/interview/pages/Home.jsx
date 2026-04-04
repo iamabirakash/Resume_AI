@@ -274,7 +274,7 @@ const Home = () => {
                             <button
                                 type="button"
                                 onClick={() => setIsUserMenuOpen((prev) => !prev)}
-                                className="w-8 h-8 rounded-full overflow-hidden ring-2 ring-teal-300"
+                                className="w-9 h-9 rounded-full overflow-hidden ring-2 ring-teal-300 hover:ring-teal-400 hover:shadow-md hover:shadow-teal-500/20 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-teal-500/70"
                                 aria-label="Open user menu"
                             >
                                 <img
@@ -284,17 +284,23 @@ const Home = () => {
                                 />
                             </button>
                             {isUserMenuOpen && (
-                                <div className="absolute right-0 top-11 min-w-40 border border-slate-200 bg-white shadow-lg p-3 z-50">
-                                    <p className="font-mono-code text-[11px] uppercase tracking-widest text-slate-700 mb-2">
+                                <div className="absolute right-0 top-12 min-w-52 overflow-hidden rounded-xl border border-slate-200 bg-white shadow-[0_16px_40px_rgba(15,23,42,0.15)] z-50">
+                                    <div className="h-1 bg-linear-to-r from-teal-500 via-teal-400 to-emerald-500" />
+                                    <div className="px-4 py-3.5">
+                                        <p className="font-mono-code text-[9px] uppercase tracking-[0.2em] text-slate-400 mb-2 text-center">
+                                            Profile
+                                        </p>
+                                        <p className="font-mono-code text-[11px] uppercase tracking-widest text-slate-700 mb-3 text-center border border-slate-200 bg-slate-50 px-3 py-2">
                                         {user?.username || "User"}
-                                    </p>
-                                    <button
-                                        onClick={onLogout}
-                                        disabled={isLoggingOut}
-                                        className="w-full text-center font-mono-code text-[10px] uppercase tracking-widest text-slate-500 hover:text-slate-800 transition-colors disabled:opacity-60"
-                                    >
-                                        {isLoggingOut ? "Logging out..." : "Logout"}
-                                    </button>
+                                        </p>
+                                        <button
+                                            onClick={onLogout}
+                                            disabled={isLoggingOut}
+                                            className="w-full text-center font-mono-code text-[10px] uppercase tracking-widest text-slate-600 border border-slate-300 bg-white hover:bg-slate-50 hover:text-slate-900 transition-colors py-2.5 disabled:opacity-60"
+                                        >
+                                            {isLoggingOut ? "Logging out..." : "Logout"}
+                                        </button>
+                                    </div>
                                 </div>
                             )}
                         </div>
