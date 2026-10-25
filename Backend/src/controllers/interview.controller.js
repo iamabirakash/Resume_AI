@@ -1,4 +1,4 @@
-const pdfParse = require("pdf-parse")
+const { extractPdfText } = require("../services/pdf.service")
 const { generateInterviewReport, generateResumePdf } = require("../services/ai.service")
 const interviewReportModel = require("../models/interviewReport.model")
 
@@ -49,8 +49,7 @@ async function generateInterViewReportController(req, res) {
 
     let resumeText = ""
     if (resumeFile) {
-        const resumeContent = await (new pdfParse.PDFParse(Uint8Array.from(resumeFile.buffer))).getText()
-        resumeText = resumeContent.text || ""
+        resumeText = await extractPdfText(resumeFile.buffer)
     }
 
     const roadmapDays = Number(req.body.roadmapDays)

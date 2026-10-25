@@ -37,11 +37,14 @@ PORT=5000
 MONGO_URI=your_mongodb_connection_string
 JWT_SECRET=your_jwt_secret
 GOOGLE_GENAI_API_KEY=your_google_genai_key
+GEMINI_MODEL=gemini-3-flash-preview
 CLIENT_URL=http://localhost:5173
 BASE_URL=http://localhost:5000
 ```
 
 If you have additional keys in your local setup, include them here as needed.
+
+`GEMINI_MODEL` is optional and defaults to `gemini-3-flash-preview`. Set it in Render's environment to use another Gemini model available to your API key without changing code. Both interview reports and resume generation retry temporary Gemini failures up to four total attempts, with exponential backoff and jitter. If the service remains busy, the API returns HTTP 503 with a retry message and `Retry-After: 30`; permanent errors such as invalid API keys are not retried.
 
 ### Run Locally
 ```bash

@@ -1,7 +1,7 @@
 const { Telegraf } = require("telegraf")
 const axios = require("axios")
 const bcrypt = require("bcryptjs")
-const pdfParse = require("pdf-parse")
+const { extractPdfText } = require("../services/pdf.service")
 const mongoose = require("mongoose")
 const userModel = require("../models/user.model")
 const interviewReportModel = require("../models/interviewReport.model")
@@ -229,9 +229,9 @@ if (bot) {
 
                 await ctx.reply("Generating your interview report. Please wait...")
 
-                const resumeContent = await (new pdfParse.PDFParse(Uint8Array.from(session.resumeBuffer))).getText()
+                const resumeText = await extractPdfText(session.resumeBuffer)
                 const aiReport = await generateInterviewReport({
-                    resume: resumeContent.text,
+                    resume: resumeText,
                     selfDescription: session.selfDescription,
                     jobDescription: session.jobDescription,
                     ...defaultInterviewOptions
@@ -239,7 +239,7 @@ if (bot) {
 
                 const interviewReport = await interviewReportModel.create({
                     user: user._id,
-                    resume: resumeContent.text,
+                    resume: resumeText,
                     selfDescription: session.selfDescription,
                     jobDescription: session.jobDescription,
                     ...aiReport

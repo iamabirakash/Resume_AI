@@ -1,12 +1,8 @@
-const { GoogleGenAI } = require("@google/genai")
+const { generateContent } = require("./gemini.service")
 const { z } = require("zod")
 const { zodToJsonSchema } = require("zod-to-json-schema")
 const puppeteer = require("puppeteer")
 const path = require("path")
-
-const ai = new GoogleGenAI({
-    apiKey: process.env.GOOGLE_GENAI_API_KEY
-})
 
 const ALLOWED_ROADMAP_DAYS = [ 7, 25, 45, 60 ]
 const ALLOWED_QUESTION_COUNTS = [ 10, 15, 20 ]
@@ -115,8 +111,7 @@ async function generateInterviewReport({
                         - Ensure all arrays are complete and match these exact counts.
 `
 
-    const response = await ai.models.generateContent({
-        model: "gemini-3-flash-preview",
+    const response = await generateContent({
         contents: prompt,
         config: {
             responseMimeType: "application/json",
@@ -191,8 +186,7 @@ async function generateResumePdf({ resume, selfDescription, jobDescription }) {
                         The resume should not be so lengthy, it should ideally be 1-2 pages long when converted to PDF. Focus on quality rather than quantity and make sure to include all the relevant information that can increase the candidate's chances of getting an interview call for the given job description.
                     `
 
-    const response = await ai.models.generateContent({
-        model: "gemini-3-flash-preview",
+    const response = await generateContent({
         contents: prompt,
         config: {
             responseMimeType: "application/json",

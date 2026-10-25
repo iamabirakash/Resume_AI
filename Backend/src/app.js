@@ -1,6 +1,7 @@
 const express = require("express")
 const cookieParser = require("cookie-parser")
 const cors = require("cors")
+const { AiServiceUnavailableError } = require("./services/gemini.service")
 
 const app = express()
 const normalizeOrigin = (value = "") => value.trim().replace(/\/+$/, "").toLowerCase()
@@ -49,6 +50,15 @@ app.use("/api/auth", authRouter)
 app.use("/api/interview", interviewRouter)
 
 app.use((err, req, res, next) => {
+    if (err instanceof AiServiceUnavailableError) {
+        console.warn("Gemini retry attempts exhausted:", err.cause?.status)
+        res.set("Retry-After", "30")
+        return res.status(503).json({
+            message: err.message,
+            code: "AI_TEMPORARILY_UNAVAILABLE"
+        })
+    }
+
     if (err?.code === "LIMIT_FILE_SIZE") {
         return res.status(413).json({
             message: "Resume file is too large. Maximum allowed size is 5 MB."
