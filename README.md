@@ -37,14 +37,19 @@ PORT=5000
 MONGO_URI=your_mongodb_connection_string
 JWT_SECRET=your_jwt_secret
 GOOGLE_GENAI_API_KEY=your_google_genai_key
-GEMINI_MODEL=gemini-3-flash-preview
+GEMINI_MODEL=gemini-3.8-flash
+GEMINI_FALLBACK_MODEL=gemini-3.5-flash-lite
 CLIENT_URL=http://localhost:5173
 BASE_URL=http://localhost:5000
 ```
 
 If you have additional keys in your local setup, include them here as needed.
 
-`GEMINI_MODEL` is optional and defaults to `gemini-3-flash-preview`. Set it in Render's environment to use another Gemini model available to your API key without changing code. Both interview reports and resume generation retry temporary Gemini failures up to four total attempts, with exponential backoff and jitter. If the service remains busy, the API returns HTTP 503 with a retry message and `Retry-After: 30`; permanent errors such as invalid API keys are not retried.
+`GEMINI_MODEL` defaults to `gemini-3.8-flash`. `GEMINI_FALLBACK_MODEL` defaults to `gemini-3.5-flash-lite`; set it to an empty value to disable fallback. Both model IDs must be available to your API key. Existing Render variables override these defaults, so update any old `GEMINI_MODEL` setting and redeploy the backend. The startup and request logs show the actual model being used.
+
+Reports and resume generation use low thinking effort on Gemini 3 models and a 120-second deadline per attempt. On temporary capacity or timeout errors, generation switches to the fallback model rather than repeatedly requesting the overloaded primary. Rate limits retry the same model. The entire operation is limited to four attempts across both models, with exponential backoff and jitter. If they remain unavailable, the API returns HTTP 503 with a retry message and `Retry-After: 30`; permanent errors such as invalid API keys are not retried.
+
+Run `npm run check:gemini` from `Backend` to make one small structured-output request to each configured model using the backend API key. It does not upload resumes or access MongoDB. Run it in Render's shell to check the deployed key and model access; local `.env` settings may differ from Render. Failed checks report HTTP status without printing credentials.
 
 ### Run Locally
 ```bash

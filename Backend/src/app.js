@@ -51,7 +51,7 @@ app.use("/api/interview", interviewRouter)
 
 app.use((err, req, res, next) => {
     if (err instanceof AiServiceUnavailableError) {
-        console.warn("Gemini retry attempts exhausted:", err.cause?.status)
+        console.warn("Gemini retry attempts exhausted:", err.model, err.cause?.status || err.cause?.name)
         res.set("Retry-After", "30")
         return res.status(503).json({
             message: err.message,
